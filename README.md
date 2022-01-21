@@ -1,6 +1,10 @@
 # prisma-implicit-explicit-relations
 
+Steps to migrate a prisma schema from implicit to explicit relationshsips. 
+
 ## Implicit
+
+This is the starting point where the models `Post` and `Category` have an implicit relationship managed by Prisma. 
 
 ```
 model User {
@@ -28,6 +32,8 @@ model Category {
 }
 ```
 
+The database holds a table `_CategoryToPost` which Prisma uses to manage the relationship 
+
 ```bash
                List of relations
  Schema |        Name        | Type  |  Owner
@@ -42,6 +48,8 @@ model Category {
 ```
 
 ## Explicit additionally 
+
+Adding fields and a model for an explicit relationship. For clarity the fields used for the implicit relationship were renamed to `categoriesImplicit` and `postsImplicit` respectively. 
 
 ```
 model User {
@@ -82,6 +90,7 @@ model CategoriesOnPosts {
 }
 ```
 
+Running `npx prisma migrate dev` updates the database and creates a new table `CategoriesOnPosts` for the explicit relationship.
 
 
 ```bash
@@ -99,6 +108,8 @@ model CategoriesOnPosts {
 ```
 
 ## Remove implicit
+
+Remove the implicit fields from the Prisma schema:
 
 ```
 model User {
@@ -138,6 +149,9 @@ model CategoriesOnPosts {
 
 ```
 
+Running `npx prisma migrate dev` updates the database and removes the table `_CategoryToPost` as its not needed anymore.
+
+
 ```bash
                List of relations
  Schema |        Name        | Type  |  Owner
@@ -152,5 +166,45 @@ model CategoriesOnPosts {
 ```
 
 
+## Rename fields
+
+Now we can rename the fields for the explicit relationship as if nothing had changed. This change does not impact the database as the fields are only represented in the Prisma schema.
+
+```
+model User {
+  id      Int      @id @default(autoincrement())
+  posts   Post[]
+  profile Profile?
+}
+
+model Profile {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  author     User       @relation(fields: [authorId], references: [id])
+  authorId   Int // relation scalar field  (used in the `@relation` attribute above)
+  categories CategoriesOnPosts[]
+
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  posts CategoriesOnPosts[]
+}
+
+model CategoriesOnPosts {
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int // relation scalar field (used in the `@relation` attribute above)
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int // relation scalar field (used in the `@relation` attribute above)
+  assignedAt DateTime @default(now())
+
+  @@id([postId, categoryId])
+}
+```
 
 
