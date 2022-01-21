@@ -26,10 +26,23 @@ model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
   authorId   Int // relation scalar field  (used in the `@relation` attribute above)
-  categories Category[]
+  categoriesImplicit Category[]
+  categoriesExplicit CategoriesOnPosts[]
+
 }
 
 model Category {
   id    Int    @id @default(autoincrement())
-  posts Post[]
+  postsImplicit Post[]
+  postsExplicit CategoriesOnPosts[]
+}
+
+model CategoriesOnPosts {
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int // relation scalar field (used in the `@relation` attribute above)
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int // relation scalar field (used in the `@relation` attribute above)
+  assignedAt DateTime @default(now())
+
+  @@id([postId, categoryId])
 }
