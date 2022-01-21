@@ -2,23 +2,15 @@
 
 Steps to migrate a prisma schema from implicit to explicit relationshsips. 
 
+This repo holds commits for the individual steps:
+
+
+
 ## Implicit
 
 This is the starting point where the models `Post` and `Category` have an implicit relationship managed by Prisma. 
 
 ```
-model User {
-  id      Int      @id @default(autoincrement())
-  posts   Post[]
-  profile Profile?
-}
-
-model Profile {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int // relation scalar field (used in the `@relation` attribute above)
-}
-
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -40,11 +32,9 @@ The database holds a table `_CategoryToPost` which Prisma uses to manage the rel
 --------+--------------------+-------+----------
  public | Category           | table | postgres
  public | Post               | table | postgres
- public | Profile            | table | postgres
- public | User               | table | postgres
  public | _CategoryToPost    | table | postgres
  public | _prisma_migrations | table | postgres
-(6 rows)
+(4 rows)
 ```
 
 ## Explicit additionally 
@@ -52,18 +42,6 @@ The database holds a table `_CategoryToPost` which Prisma uses to manage the rel
 Adding fields and a model for an explicit relationship. For clarity the fields used for the implicit relationship were renamed to `categoriesImplicit` and `postsImplicit` respectively. 
 
 ```
-model User {
-  id      Int      @id @default(autoincrement())
-  posts   Post[]
-  profile Profile?
-}
-
-model Profile {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int // relation scalar field (used in the `@relation` attribute above)
-}
-
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -100,11 +78,9 @@ Running `npx prisma migrate dev` updates the database and creates a new table `C
  public | CategoriesOnPosts  | table | postgres
  public | Category           | table | postgres
  public | Post               | table | postgres
- public | Profile            | table | postgres
- public | User               | table | postgres
  public | _CategoryToPost    | table | postgres
  public | _prisma_migrations | table | postgres
-(7 rows)
+(5 rows)
 ```
 
 ## Remove implicit
@@ -112,18 +88,6 @@ Running `npx prisma migrate dev` updates the database and creates a new table `C
 Remove the implicit fields from the Prisma schema:
 
 ```
-model User {
-  id      Int      @id @default(autoincrement())
-  posts   Post[]
-  profile Profile?
-}
-
-model Profile {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int // relation scalar field (used in the `@relation` attribute above)
-}
-
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -159,10 +123,8 @@ Running `npx prisma migrate dev` updates the database and removes the table `_Ca
  public | CategoriesOnPosts  | table | postgres
  public | Category           | table | postgres
  public | Post               | table | postgres
- public | Profile            | table | postgres
- public | User               | table | postgres
  public | _prisma_migrations | table | postgres
-(6 rows)
+(4 rows)
 ```
 
 
@@ -171,18 +133,6 @@ Running `npx prisma migrate dev` updates the database and removes the table `_Ca
 Now we can rename the fields for the explicit relationship as if nothing had changed. This change does not impact the database as the fields are only represented in the Prisma schema.
 
 ```
-model User {
-  id      Int      @id @default(autoincrement())
-  posts   Post[]
-  profile Profile?
-}
-
-model Profile {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int // relation scalar field (used in the `@relation` attribute above)
-}
-
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
