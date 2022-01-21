@@ -1,16 +1,15 @@
 # prisma-implicit-explicit-relations
 
-Steps to migrate a prisma schema from implicit to explicit relationshsips. 
+Steps to migrate a Prisma schema from implicit to explicit relationshsips. 
 
 This repo holds commits for the individual steps:
-
 
 
 ## Implicit
 
 This is the starting point where the models `Post` and `Category` have an implicit relationship managed by Prisma. 
 
-```
+```prisma
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -41,7 +40,7 @@ The database holds a table `_CategoryToPost` which Prisma uses to manage the rel
 
 Adding fields and a model for an explicit relationship. For clarity the fields used for the implicit relationship were renamed to `categoriesImplicit` and `postsImplicit` respectively. 
 
-```
+```prisma
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -87,7 +86,7 @@ Running `npx prisma migrate dev` updates the database and creates a new table `C
 
 Remove the implicit fields from the Prisma schema:
 
-```
+```prisma
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -132,7 +131,7 @@ Running `npx prisma migrate dev` updates the database and removes the table `_Ca
 
 Now we can rename the fields for the explicit relationship as if nothing had changed. This change does not impact the database as the fields are only represented in the Prisma schema.
 
-```
+```prisma
 model Post {
   id         Int        @id @default(autoincrement())
   author     User       @relation(fields: [authorId], references: [id])
@@ -156,5 +155,3 @@ model CategoriesOnPosts {
   @@id([postId, categoryId])
 }
 ```
-
-
